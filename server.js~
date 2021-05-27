@@ -1,0 +1,50 @@
+const express = require('express');
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+const cookieParser = require('cookie-parser')
+const { v4: uuidv4 } = require('uuid')
+//const game = require('./game')
+const db = require('./db_class')
+const PORT = process.env.PORT || 3000;
+
+app.use(cookieParser())
+app.use(express.static('static'))
+
+server.listen(PORT, () => {
+    console.log(`listening on *:${PORT}`);
+});
+
+io.on('connection', (socket) => {
+	console.log('CONNECTED')
+	socket.on('add player', (player) => {
+		var name = player.name
+		var room = player.room
+		var cookie = player.cookie
+		var socketId = player.socketId
+		if(!cookie) {
+			cookie = uuidv4()
+			io.to(socket.id).emit('cookie', cookie)
+		}
+		let map = new Map();
+		map.set('name',name)
+		map.set('room_id',room)
+		map.set('cookie', cookie)
+		map.set('socket_id', socketId)
+		db.handleUser(map)
+		console.log(db.playerIsInGame(socket.id))
+	});
+    socket.on('start game', (cookie) => {
+    	console.log('start')
+	});
+	socket.on('disconnect', () => {
+		console.log('disconnect')
+	})
+	//game.handleGameConnect(socket, io)
+});

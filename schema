@@ -1,0 +1,4 @@
+CREATE TABLE players (
+	cookie TEXT PRIMARY KEY,
+	socket_id TEXT NOT NULL UNIQUE
+);

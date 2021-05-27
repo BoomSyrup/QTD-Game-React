@@ -1,0 +1,189 @@
+const sqlite3 = require('sqlite3').verbose();
+
+	function cookieInDB(newPlayerData, row) {
+		if(row) {
+			console.log('edit player')
+			editPlayer('cookie', newPlayerData[0], newPlayerData)
+		} else {
+			console.log('add player')
+			addPlayer(newPlayerData)
+		}
+	}
+
+	function socketInDB(row){
+		if(row) {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	function getGame(roomId, returnGameCallBack) {
+		let gameQ = "SELECT room_id roomId, player_queue playerQueue, running_verse runningVerse, full_verse fullVerse, loc_verse locVerse, lives lives FROM games WHERE room_id = ?"
+		this.db.get(gameQ, [roomId],(err, row)=> {
+			console.log("getGame")
+			if(err) {
+    			return console.error(err.message);
+    		}
+    		returnGameCallBack(row)
+		})
+	}
+	// game = [roomId, players, runningVerse, fullVerse, locVerse, lives]
+	function addGame(game) {
+		let addGameQ = 'INSERT INTO games(room_id, player_queue, running_verse, full_verse, loc_verse, lives) VALUES (?,?,?,?,?,?);'
+		this.db.run(addGameQ,game,(err)=> {
+			if(err) {
+				console.log("addGame")
+    			return console.error(err.message);
+    		}
+		})
+	}
+
+	function deleteGame(roomId) {
+		let deleteQ = "DELETE FROM games WHERE room_id = ?" 
+		this.db.run(deleteQ, [roomId],(err)=> {
+			if(err) {
+    			return console.error(err.message);
+    		}
+		})
+	}
+
+	function deletePlayer(playerCookie) {
+		let deleteQ = "DELETE FROM players WHERE cookie = ?" 
+		this.db.run(deleteQ, [playerCookie],(err)=> {
+			if(err) {
+    			return console.error(err.message);
+    		}
+		})
+	}
+
+	function close() {
+		this.db.close((err) => {
+		  if (err) {
+		    return console.error(err.message);
+		  }
+		  console.log('Close the database connection.');
+		});
+	}
+
+	function connect() {
+		this.db = new sqlite3.Database('./db/QTDGame.db', (err) => {
+		if (err) {
+			return console.error(err.message);
+	  	}
+	  		console.log('Connected to the SQlite database.');
+		});
+		return this.db
+	}
+
+	//player = [cookie, socket_id, name, room_id, connected]
+	function addPlayer(player) {
+		let addPlayerQ = 'INSERT INTO players(cookie, socket_id, name, room_id, connected) VALUES (?,?,?,?,?);'
+		this.db.run(addPlayerQ,player,(err)=> {
+			if(err) {
+    			return console.error(err.message);
+    		}
+		})
+	}
+
+	//change = [cookie, socket_id, name, room_id, connected]
+	function editPlayer (colName, keyVal, player) {
+
+		let updateQ = "UPDATE players SET cookie = ?, socket_id = ?, name = ?, room_id = ?, connected = ? "
+		updateQ += "WHERE " + colName + " = \"" + keyVal + "\";"
+		this.db.run(updateQ, player,(err)=> {
+			if(err) {
+    			return console.error(err.message);
+    		}
+		})
+	}
+
+	function editGame(roomId, changeMap) {
+		let updateQ = "UPDATE players SET "
+		let args = []
+		changeMap.forEach((value, key) => {
+			updateQ += key + " = ? "
+			args.push(value)
+		})
+		updateQ += "WHERE room_id = ?;"
+		args.push(roomId)
+		this.db.run(updateQ,[args],(err)=> {
+			if(err) {
+    			return console.error(err.message);
+    		}
+		})
+	}
+	function getPlayerByCookie (playerCookie, newPlayerData, returnPlayerCallBack) {
+		let playerQ = "SELECT cookie cookie, socket_id socketId, name name, room_id roomId, connected connected FROM players WHERE cookie = ?"
+		this.db.get(playerQ, [playerCookie],(err, row)=> {
+			console.log("getPlayerByCookie")
+			if(err) {
+    			return console.error(err.message);
+    		}
+    		returnPlayerCallBack(newPlayerData, row);
+		})
+	}
+
+	function getPlayerBySocket(playerSocket, returnPlayerCallBack) {
+		let playerQ = "SELECT cookie cookie, socket_id socketId, name name, room_id roomId, connected connected FROM players WHERE socket_id = ?"
+		this.db.get(playerQ, [playerSocket],(err, row)=> {
+			console.log("getPlayerBySocket")
+			if(err) {
+    			return console.error(err.message);
+    		}
+    		returnPlayerCallBack(row);
+		}) 
+	}
+
+module.exports = {
+	handleUser: function(playerMap) {
+		connect()
+		let cookie = playerMap.get('cookie')
+		let socketId = playerMap.get('socket_id')
+		let name = playerMap.get('name')
+		let room = playerMap.get('room_id')
+		let newPlayerData = [cookie, socketId, name, room, 1]
+		getPlayerByCookie(cookie, newPlayerData, cookieInDB)
+		close()
+	},
+
+	playerIsInGame: function(socket) {
+		connect()
+		return getPlayerBySocket(socket, socketInDB)
+	},
+
+	addPlayerToGame: function(roomId, playerCookie) {
+		let playerQ = "UPDATE players SET room_id = ? WHERE cookie = ?;"
+		let playersInGameQ = "SELECT player_queue queue FROM games WHERE room_id = ?"
+		let roomQ = "UPDATE games SET player_queue = ? WHERE room_id = ?"
+		this.db.serialize(()=> {
+			this.db.run(playerQ, [roomId, playerCookie],(err)=> {
+				if(err) {
+	    			return console.error(err.message);
+	    		}
+			})
+
+			this.db.get(playersInGameQ, [roomId],(err, row)=> {
+				if(err) {
+	    			return console.error(err.message);
+	    		}
+	    		else {
+	    			var newQueue = ""
+	    			if(row.queue == "") {
+	    				newQueue = playerCookie
+	    			} else {
+	    				newQueue = row.queue + " " + playerCookie
+	    			}
+	    			this.db.run(roomQ, [newQueue, roomId],(err)=> {
+						if(err) {
+			    			return console.error(err.message);
+			    		}
+					})
+	    		}
+			})
+		});
+		
+	},
+
+}
+
