@@ -4,8 +4,8 @@ import React from "react";
 import socketIOClient from "socket.io-client";
 import Lobby from "./Lobby"
 import Game from "./Game"
-const ENDPOINT = "http://localhost:3000";
-const socket = socketIOClient(ENDPOINT);
+import { io } from "socket.io-client";
+const socket = io();
 
 export class Home extends React.Component {
 	constructor(props) {
@@ -81,6 +81,7 @@ export class Home extends React.Component {
   	}
 
   	handleSubmitCreate(event) {
+  		console.log(socket.id)
     	socket.emit("create room")
     	event.preventDefault();
   	}
