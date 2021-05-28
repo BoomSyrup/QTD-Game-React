@@ -1,7 +1,6 @@
 import './Home.css';
 import ReactDOM from 'react-dom';
 import React from "react";
-import socketIOClient from "socket.io-client";
 import Lobby from "./Lobby"
 import Game from "./Game"
 import { io } from "socket.io-client";
