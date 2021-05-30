@@ -83,8 +83,8 @@ export class Game extends React.Component {
 	 				<div className="row text-center">
 	        			<div className="col text-left topBarText"> <h3 className="lead"> {this.state.lives} Lives </h3> </div>
 	        			<div className="col text-right topBarText"> <h3 className="lead">{this.state.verseLoc} </h3> </div>
-	        			</div>
-	 				<div id="run">{this.state.runningVerse.join(" ")}</div>		
+	        		</div>
+	 				<p id="run">{this.state.runningVerse.join(" ")}</p>		
 	 			</div>
 	 		</div>
 	 		<div className="container py-4 fixed-bottom">
