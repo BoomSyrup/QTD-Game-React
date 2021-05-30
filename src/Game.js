@@ -32,6 +32,7 @@ export class Game extends React.Component {
 	  			vocab = data.vocab.map((word, i) =>
 	    		<button key={i} value={word} className="btn btn-sm" onClick={this.handleClick} style={{backgroundColor: "#16a89d", color: "white"}}>{word}</button>
 	  			);
+			    
 	  		} else {
 	  			vocab = data.vocab.map((word, i) =>
 	    		<button key={i} value={word} className="btn" onClick={this.handleClick} style={{backgroundColor: "#16a89d", color: "white"}}>{word}</button>
@@ -75,16 +76,15 @@ export class Game extends React.Component {
 	render() {
 		return (
 	    <div className="Game">
-	   		<div className="text-center" id="errorNotif">
-	    		{this.state.error}
-	    	</div>
+	   	<div className="text-center" id="errorNotif">
+		</div>
 	    	<div className="container">
 	 			<div id="topBarDiv">
 	 				<div className="row text-center">
 	        			<div className="col text-left topBarText"> <h3 className="lead"> {this.state.lives} Lives </h3> </div>
 	        			<div className="col text-right topBarText"> <h3 className="lead">{this.state.verseLoc} </h3> </div>
-	        		</div>
-	 				<h1 id="run">{this.state.runningVerse.join(" ")}</h1>		
+	        			</div>
+	 				<div id="run">{this.state.runningVerse.join(" ")}</div>		
 	 			</div>
 	 		</div>
 	 		<div className="container py-4 fixed-bottom">
