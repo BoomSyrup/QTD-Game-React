@@ -59,14 +59,14 @@ export class Game extends React.Component {
 			if(win) {
 				ReactDOM.render(
 				  	<React.StrictMode>
-				    	<Win correctVerse={correctVerse}/>
+				    	    <Win correctVerse={correctVerse} verseLoc={this.state.verseLoc}/>
 				  	</React.StrictMode>,
 				  	document.getElementById('root')
 				);
 			} else {
 				ReactDOM.render(
 				  	<React.StrictMode>
-				    	<Lose correctVerse={correctVerse}/>
+				    	    <Lose correctVerse={correctVerse} verseLoc={this.state.verseLoc}/>
 				  	</React.StrictMode>,
 				  	document.getElementById('root')
 				);

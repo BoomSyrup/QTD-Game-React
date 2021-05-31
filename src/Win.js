@@ -1,3 +1,4 @@
+
 import React from "react";
 
 export class Win extends React.Component {
@@ -18,7 +19,7 @@ export class Win extends React.Component {
     				<h1 className="display-4">Wow big brain 🧠</h1>
     				<hr className="my-4"></hr>
     				<p className="lead">
-    					{this.props.correctVerse}
+    				    {this.props.correctVerse} - {this.props.verseLoc}
   					</p>
 	  				<p className="lead">
 	    				<button className="btn btn-warning" onClick={this.reload}>Play Again</button>

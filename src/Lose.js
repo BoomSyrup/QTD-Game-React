@@ -18,7 +18,7 @@ export class Lose extends React.Component {
     				<h1 className="display-4">Keep Practicing! 加油！</h1>
     				<hr className="my-4"></hr>
     				<p className="lead">
-    					The Verse is: {this.props.correctVerse}
+    				    The Verse is: {this.props.correctVerse} - {this.props.verseLoc}
   					</p>
   					<p className="lead">
     					<button className="btn btn-warning" onClick={this.reload}>Play Again</button>
